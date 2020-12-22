@@ -16,7 +16,7 @@ import javax.persistence.ManyToOne;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class Book extends PanacheEntity {
 
-    private String ISBN;
+    private String isbn;
     private String title;
     private String subject;
     private String publisher;

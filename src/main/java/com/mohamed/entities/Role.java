@@ -1,5 +1,6 @@
 package com.mohamed.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.security.jpa.RolesValue;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 
 @Entity
@@ -16,7 +18,9 @@ import javax.persistence.ManyToOne;
 @NoArgsConstructor
 public class Role extends PanacheEntity {
     @RolesValue
+    @NotNull
     private String role;
     @ManyToOne
-    private Account account;
+    @JsonIgnore
+    private Member account;
 }

@@ -1,5 +1,6 @@
 package com.mohamed.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,5 +18,6 @@ public class Library extends PanacheEntity {
     @OneToOne
     private Address address;
     @OneToOne
-    private Account account;
+    @JsonIgnore
+    private Member member;
 }

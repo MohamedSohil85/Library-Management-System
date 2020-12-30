@@ -20,14 +20,17 @@ public class BookItem extends Book{
 
     private String barcode;
     private boolean isReferenceOnly;
+    @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Europa/Berlin")
     private Date borrowed;
+    @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Europa/Berlin")
     private Date dueDate;
     @Enumerated(EnumType.STRING)
     private BookFormat format;
     @Enumerated(EnumType.STRING)
     private BookStatus status;
+    @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Europa/Berlin")
     private Date publicationDate;
     @ManyToOne

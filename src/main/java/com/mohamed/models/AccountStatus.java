@@ -5,5 +5,5 @@ public enum AccountStatus {
     CLOSED,
     CANCELED,
     BLACKLISTED,
-    NONE
+    INACTIVE
 }

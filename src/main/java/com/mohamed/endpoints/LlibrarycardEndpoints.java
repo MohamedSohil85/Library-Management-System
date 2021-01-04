@@ -5,6 +5,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.oned.EAN13Writer;
+import com.google.zxing.oned.UPCAWriter;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.encoder.QRCode;
 import com.mohamed.entities.LibraryCard;
@@ -16,6 +17,8 @@ import io.quarkus.panache.common.Parameters;
 import lombok.NonNull;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import javax.imageio.ImageIO;
@@ -48,14 +51,14 @@ public class LlibrarycardEndpoints {
     public String  qrGenerator(@Valid Member data ) throws WriterException, IOException {
         String name=data.getName();
 
-        String qcodePath = "C:\\Users\\Mimo\\Desktop\\LibraryManagementSystem\\src\\main\\resources\\images"+name+"-QRCode.png";
+        String qcodePath = "C:\\Users\\Mimo\\Desktop\\LibraryManagementSystem\\src\\main\\resources\\images\\"+name+"-QRCode.png";
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        BitMatrix bitMatrix = qrCodeWriter.encode("Name of Member:"+name+ "\n"+"User-Token :"+data.getToken()+"\n"+"User-Status :"+data.getStatus()+"\n"+"Date of Membership :"+data.getDateOfMembership()+"\n"
+        BitMatrix bitMatrix = qrCodeWriter.encode("Name of Member:"+name+ "\n"+"User-Token :"+data.getToken()+"\n"+"User-Status :"+data.getStatus()+"\n"+"Date of Membership :"+data.getDateOfMembership()+"\n"+"Library :"+data.getLibrary().getLibraryName()
              , BarcodeFormat.QR_CODE, 350, 350);
         Path path = FileSystems.getDefault().getPath(qcodePath);
         MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
 
-        return name+ "-QRCode.png";
+        return "\\images\\"+name+ "-QRCode.png";
 
     }
     @POST
@@ -66,7 +69,7 @@ public class LlibrarycardEndpoints {
         return membershipRepository.findByIdOptional(id).map(member -> {
             member.setLibraryCard(libraryCard);
             libraryCard.setMember(member);
-            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+           QRCodeWriter qrCodeWriter=new QRCodeWriter();
 
 
             BitMatrix bitMatrix = null;
@@ -83,6 +86,7 @@ public class LlibrarycardEndpoints {
             }
             byte[] pngData = pngOutputStream.toByteArray();
 
+
             libraryCard.setImages(pngData);
             libraryCard.setRegistratedAt(new Date());
             libraryCardRepository.persist(libraryCard);
@@ -94,7 +98,7 @@ public class LlibrarycardEndpoints {
     }
 
     @POST
-    @javax.ws.rs.Path("/LibraryCardByMemberId/{id}")
+    @javax.ws.rs.Path("/QR-Generator-ByMemberId/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     public Response creatLibraryCard(@PathParam("id")Long id,LibraryCard libraryCard) {
@@ -121,5 +125,6 @@ public class LlibrarycardEndpoints {
    public Optional<LibraryCard>getImagesById(@PathParam("id")Long id){
         return LibraryCard.find("SELECT images FROM LibraryCard WHERE id = :id",Parameters.with("id",id)).singleResultOptional();
     }
+    //TODO read QR-Code
     
 }

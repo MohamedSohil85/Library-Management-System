@@ -34,22 +34,21 @@ public class Member extends PanacheEntity {
     @Size(min = 3,message = "Username must at least 3 charackter ")
     private String username;
     @Password
-    @Size(min = 5 ,message = "Password at least o charackter")
+    @Size(min = 5 ,message = "Password at least 3 charackter")
     private String password;
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
     @OneToOne
-    @NotNull
+    @JsonIgnore
     private LibraryCard libraryCard;
     @OneToOne
-    @NotNull
+
     private Address address;
     @OneToOne
-    @NotNull
+
     private Library library;
     @OneToMany
     @Roles
-    @NotNull
     private List<Role>roles;
 
     public String getName() {

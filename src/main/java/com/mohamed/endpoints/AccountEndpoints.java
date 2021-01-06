@@ -1,6 +1,7 @@
 package com.mohamed.endpoints;
 
 
+import com.github.javafaker.Faker;
 import com.mohamed.entities.*;
 import com.mohamed.exceptions.ResourceNotFound;
 import com.mohamed.models.AccountStatus;
@@ -53,22 +54,21 @@ public class AccountEndpoints {
     @Produces(MediaType.APPLICATION_JSON)
     @POST
     @Transactional
-    public Response createNewMember(@Valid Member member){
-
+    public Response createNewMember(){
+        Faker faker=new Faker();
         List<Member> accountList=membershipRepository.listAll(Sort.descending("name"));
-        for(Member temp:accountList){
-            if(temp.getName().equalsIgnoreCase(member.getName()))
-            // if(temp.getEmail().equalsIgnoreCase(member.getEmail()))
-              if(temp.getUsername().equalsIgnoreCase(member.getUsername())){
-                return Response.status(Response.Status.FOUND).build();
-            }
-        }
+       Member member=new Member();
         String token=UUID.randomUUID().toString();
         member.setToken(token);
         member.setDateOfMembership(new Date());
         member.setStatus(AccountStatus.INACTIVE);
-        mailer.send(Mail.withText(member.getEmail(),"Confirmation from System","Please click the following Link to continue registration :\n" +
-                " http://localhost:8080/api/MemberByToken?token="+member.getToken()));
+        member.setName(faker.name().fullName());
+        member.setPhone(faker.phoneNumber().phoneNumber());
+        member.setUsername(faker.name().username());
+        member.setEmail(faker.internet().emailAddress());
+
+       //nd(Mail.withText(member.getEmail(),"Confirmation from System","Please click the following Link to continue registration :\n" +
+             //   " http://localhost:8080/api/MemberByToken?token="+member.getToken()));
          membershipRepository.persist(member);
      return Response.ok(member).build();
 
@@ -104,8 +104,15 @@ public class AccountEndpoints {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response createAddress(@Valid Address address, @PathParam("id")Long id){
+    public Response createAddress( @PathParam("id")Long id){
         return membershipRepository.findByIdOptional(id).map(member -> {
+            Address address=new Address();
+            Faker faker= new Faker();
+            address.setCity(faker.address().city());
+            address.setCountry(faker.address().country());
+            address.setState(faker.address().state());
+            address.setZipCode(faker.address().zipCode());
+            address.setStreetAddress(faker.address().streetAddress());
             member.setAddress(address);
             addressRepository.persist(address);
             return Response.status(Response.Status.CREATED).build();

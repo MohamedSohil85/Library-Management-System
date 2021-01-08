@@ -1,8 +1,14 @@
 package com.mohamed.endpoints;
 
 import com.github.javafaker.Faker;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.mohamed.entities.Author;
 import com.mohamed.entities.BookItem;
+import com.mohamed.entities.Member;
 import com.mohamed.exceptions.ResourceNotFound;
 import com.mohamed.models.BookFormat;
 import com.mohamed.models.BookStatus;
@@ -19,6 +25,8 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -62,6 +70,13 @@ public class BookEndpoints {
             bookItem.setPublicationDate(faker.date().between(new Date(1990),new Date(2020)));
             catalog.getBookList().add(bookItem);
             bookItem.setCatalog(catalog);
+            try {
+                String QR_Generator=qrGenerator(bookItem);
+            } catch (WriterException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             bookItemRepository.persist(bookItem);
             return Response.status(Response.Status.CREATED).build();
         }).orElse(Response.noContent().build());
@@ -80,7 +95,7 @@ public class BookEndpoints {
         return bookItems;
 
     }
-    //TODO find Books By Search Key
+
     @GET
     @Path("/findBookBySearch/{keyword}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -109,6 +124,20 @@ public class BookEndpoints {
             }
             return Response.status(Response.Status.CREATED).build();
         }).orElse(Response.noContent().build());
+    }
+
+    public String  qrGenerator(@Valid BookItem bookItem ) throws WriterException, IOException {
+        String name= bookItem.getTitle();
+
+        String qcodePath = "C:\\Users\\Mimo\\Desktop\\LibraryManagementSystem\\src\\main\\resources\\images\\"+name+"-QRCode.png";
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode("title :"+name+ "\n"+"isbn :"+bookItem.getIsbn()+"\n"+"Book-Status :"+bookItem.getStatus()+"\n"+"Date of Publicate :"+bookItem.getPublicationDate()+"\n"+"Borrowed Date :"+bookItem.getBorrowed()
+                +"\n"+bookItem.getDueDate()+"\n"+"Url-Enroll :"+"http://localhost:8080/api/loan/Book/"+name+"/Member/{put_User_Token}", BarcodeFormat.QR_CODE, 350, 350);
+        java.nio.file.Path path = FileSystems.getDefault().getPath(qcodePath);
+        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+
+        return "\\images\\"+name+ "-QRCode.png";
+
     }
 
 }

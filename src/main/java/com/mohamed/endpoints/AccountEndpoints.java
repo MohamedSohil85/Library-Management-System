@@ -67,8 +67,8 @@ public class AccountEndpoints {
         member.setUsername(faker.name().username());
         member.setEmail(faker.internet().emailAddress());
 
-       //nd(Mail.withText(member.getEmail(),"Confirmation from System","Please click the following Link to continue registration :\n" +
-             //   " http://localhost:8080/api/MemberByToken?token="+member.getToken()));
+       mailer.send(Mail.withText(member.getEmail(),"Confirmation from System","Please click the following Link to continue registration :\n" +
+              " http://localhost:8080/api/MemberByToken?token="+member.getToken()));
          membershipRepository.persist(member);
      return Response.ok(member).build();
 

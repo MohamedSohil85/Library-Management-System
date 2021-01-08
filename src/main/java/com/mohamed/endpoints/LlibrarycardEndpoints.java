@@ -6,6 +6,7 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.oned.EAN13Writer;
 import com.google.zxing.oned.UPCAWriter;
+import com.google.zxing.pdf417.PDF417Writer;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.encoder.QRCode;
 import com.mohamed.entities.LibraryCard;
@@ -51,30 +52,29 @@ public class LlibrarycardEndpoints {
     public String  qrGenerator(@Valid Member data ) throws WriterException, IOException {
         String name=data.getName();
 
-        String qcodePath = "C:\\Users\\Mimo\\Desktop\\LibraryManagementSystem\\src\\main\\resources\\images\\"+name+"-QRCode.png";
-        QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        BitMatrix bitMatrix = qrCodeWriter.encode("Name of Member:"+name+ "\n"+"User-Token :"+data.getToken()+"\n"+"User-Status :"+data.getStatus()+"\n"+"Date of Membership :"+data.getDateOfMembership()+"\n"+"Library :"+data.getLibrary().getLibraryName()
-             , BarcodeFormat.QR_CODE, 350, 350);
+        String qcodePath = "C:\\Users\\Mimo\\Desktop\\LibraryManagementSystem\\src\\main\\resources\\images\\"+name+"-BRCode.png";
+        PDF417Writer pdf417Writer = new PDF417Writer();
+        BitMatrix bitMatrix = pdf417Writer.encode("Name of Member:"+name+ "\n"+"User-Token :"+data.getToken()+"\n"+"User-Status :"+data.getStatus()+"\n"+"Date of Membership :"+data.getDateOfMembership()+"\n"+"Library :"+data.getLibrary().getLibraryName()
+             , BarcodeFormat.PDF_417, 350, 350);
         Path path = FileSystems.getDefault().getPath(qcodePath);
         MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
 
-        return "\\images\\"+name+ "-QRCode.png";
+        return "\\images\\"+name+ "-BRCode.png";
 
     }
     @POST
     @javax.ws.rs.Path("/Generate-QRcode-ByMemberId/{id}")
     @Produces("image/png")
     @Transactional
-    public Response barcodeGenerator(@PathParam("id")Long id,LibraryCard libraryCard) throws WriterException, IOException {
+    public Response barcodeGenerator(@PathParam("id")Long id) throws WriterException, IOException {
         return membershipRepository.findByIdOptional(id).map(member -> {
+            LibraryCard libraryCard=new LibraryCard();
             member.setLibraryCard(libraryCard);
-            libraryCard.setMember(member);
-           QRCodeWriter qrCodeWriter=new QRCodeWriter();
-
-
+          libraryCard.setMember(member);
+          PDF417Writer pdf417Writer=new PDF417Writer();
             BitMatrix bitMatrix = null;
             try {
-                bitMatrix = qrCodeWriter.encode("Member :"+member.getName()+"\n"+"User-Token :"+member.getToken()+"\n"+"User-Status :"+member.getStatus()+"\n"+"Date of Membership :"+member.getDateOfMembership()+"\n"+"Library :"+member.getLibrary().getLibraryName(), BarcodeFormat.QR_CODE,350,350);
+                bitMatrix = pdf417Writer.encode("Member :"+member.getName()+"\n"+"User-Token :"+member.getToken()+"\n"+"User-Status :"+member.getStatus()+"\n"+"Date of Membership :"+member.getDateOfMembership()+"\n"+"Library :"+member.getLibrary().getLibraryName(), BarcodeFormat.PDF_417,350,400);
             } catch (WriterException e) {
                 e.printStackTrace();
             }
@@ -98,11 +98,12 @@ public class LlibrarycardEndpoints {
     }
 
     @POST
-    @javax.ws.rs.Path("/QR-Generator-ByMemberId/{id}")
+    @javax.ws.rs.Path("/BR-Generator-ByMemberId/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response creatLibraryCard(@PathParam("id")Long id,LibraryCard libraryCard) {
+    public Response creatLibraryCard(@PathParam("id")Long id) {
         return membershipRepository.findByIdOptional(id).map(member -> {
+            LibraryCard libraryCard=new LibraryCard();
             member.setLibraryCard(libraryCard);
             libraryCard.setMember(member);
 
@@ -125,6 +126,6 @@ public class LlibrarycardEndpoints {
    public Optional<LibraryCard>getImagesById(@PathParam("id")Long id){
         return LibraryCard.find("SELECT images FROM LibraryCard WHERE id = :id",Parameters.with("id",id)).singleResultOptional();
     }
-    //TODO read QR-Code
+
     
 }

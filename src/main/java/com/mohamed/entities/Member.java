@@ -39,7 +39,7 @@ public class Member extends PanacheEntity {
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
     @OneToOne
-    @JsonIgnore
+
     private LibraryCard libraryCard;
     @OneToOne
 

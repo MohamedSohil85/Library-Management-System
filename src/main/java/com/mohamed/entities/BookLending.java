@@ -6,9 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -17,15 +16,17 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 public class BookLending extends PanacheEntity {
-
+    @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Europa/Berlin")
     private Date creationDate;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Europa/Berlin")
-    private Date dueDate;
+    private LocalDate dueDate;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Europa/Berlin")
-    private Date returnDate;
-    @OneToMany
-    private List<BookItem> bookItems;
+    private LocalDate returnDate;
+    @OneToOne
+    private BookItem bookItems;
     @OneToOne
     private LibraryCard libraryCard;
+    @OneToOne
+    Member member;
 }

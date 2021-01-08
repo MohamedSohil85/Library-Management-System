@@ -7,4 +7,5 @@ import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class LoanRepository implements PanacheRepository<BookLending> {
+
 }

@@ -15,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Optional;
 
 @Path("/api")
 public class RackEndpoints {
@@ -23,18 +24,34 @@ public class RackEndpoints {
     @Inject
     BookItemRepository bookItemRepository;
 
-    @Path("/addBookToRack/{bookId}")
+    @Path("/createRack")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response saveBookToRack(Rack rack, @PathParam("bookId")Long id){
-        return bookItemRepository.findByIdOptional(id).map(bookItem -> {
+    public Response addRack(){
+        Faker faker=new Faker();
 
-            Faker faker=new Faker();
-            rack.setNumber(5);
-            rack.setLocationIdentifier(faker.number().digit());
-            rack.getBookItems().add(bookItem);
+        Rack rack=new Rack();
+        rack.setLocationIdentifier(faker.number().digit());
+        rack.setNumber(faker.number().randomDigitNotZero());
+        return Response.status(Response.Status.CREATED).build();
+    }
+
+
+    @Path("/addBookToRack/Book/{bookId}/Rack/{rackId}")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public Response saveBookToRack( @PathParam("bookId")Long id,@PathParam("rackId")Long rackId){
+        return bookItemRepository.findByIdOptional(id).map(bookItem -> {
+            Optional<Rack>rackOptional=rackRepository.findByIdOptional(rackId);
+            Rack rack=rackOptional.get();
+            if(!rackOptional.isPresent()){
+
+               return Response.noContent().build();
+            }
             bookItem.setPlacedAt(rack);
+            rack.getBookItems().add(bookItem);
             rackRepository.persist(rack);
             return Response.status(Response.Status.CREATED).build();
         }).orElse(Response.noContent().build());
